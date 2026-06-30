@@ -1,33 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 
-function CreatePost() {
+function CreateReel() {
 
   const [loading, setLoading] = useState(false);
-  const [generated, setGenerated] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [script, setScript] = useState(null);
 
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
-  const [platform, setPlatform] = useState("Instagram");
-  const [tone, setTone] = useState("Friendly");
-
-
-  // 🔥 Fetch history
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/posts`);
-      const data = await res.json();
-      setHistory(data);
-    } catch (err) {
-      console.error("Error fetching history:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
+  const [platform, setPlatform] = useState("Instagram Reel");
 
   const handleGenerate = async (e) => {
 
@@ -36,62 +17,53 @@ function CreatePost() {
 
     try {
 
+      const topic = `${productName} ${description} for ${platform}`;
+
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/generate-post`,
+        `${import.meta.env.VITE_API_URL}/generate-reel?topic=${topic}`,
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            product_name: productName,
-            description: description,
-            platform: platform,
-            tone: tone
-          })
+          method: "POST"
         }
       );
 
       const data = await response.json();
 
-      // ✅ Now backend already returns structured JSON
-      setGenerated({
+      setScript({
         hook: data.hook,
+        script: data.script,
         caption: data.caption,
         hashtags: data.hashtags
       });
 
-      // 🔥 Refresh history
-      await fetchHistory();
-
     } catch (error) {
-      console.error("Error generating post:", error);
+      console.error("Error generating reel:", error);
     }
 
     setLoading(false);
   };
 
-
   return (
 
     <div className="flex min-h-screen bg-[#F4EBD3]">
 
+      {/* Sidebar */}
       <Sidebar />
 
+      {/* Main Content */}
       <div className="flex-1 p-10">
 
         <h1 className="text-3xl font-bold text-[#555879] mb-10">
-          Create Social Media Post
+          Create Reel
         </h1>
 
         <div className="grid md:grid-cols-2 gap-8">
 
-          {/* FORM */}
+          {/* LEFT SIDE FORM */}
 
           <div className="bg-white p-8 rounded-xl shadow">
 
             <h2 className="text-xl font-semibold mb-6">
-              Post Details
+              Reel Details
             </h2>
 
             <form onSubmit={handleGenerate} className="space-y-4">
@@ -106,7 +78,7 @@ function CreatePost() {
               />
 
               <textarea
-                placeholder="Product Description"
+                placeholder="Describe your product"
                 className="w-full p-3 border rounded-lg"
                 rows="3"
                 value={description}
@@ -119,65 +91,69 @@ function CreatePost() {
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
               >
-                <option>Instagram</option>
-                <option>LinkedIn</option>
-                <option>Twitter</option>
-              </select>
 
-              <select
-                className="w-full p-3 border rounded-lg"
-                value={tone}
-                onChange={(e) => setTone(e.target.value)}
-              >
-                <option>Friendly</option>
-                <option>Professional</option>
-                <option>Funny</option>
+                <option>Instagram Reel</option>
+                <option>YouTube Shorts</option>
+                <option>TikTok</option>
+
               </select>
 
               <button
-                type="submit"
-                disabled={loading}
                 className="w-full bg-[#98A1BC] text-white py-3 rounded-lg hover:bg-[#7f88a5]"
               >
-                {loading ? "Generating..." : "Generate Post"}
+                {loading ? "Generating..." : "Generate Reel Script"}
               </button>
 
             </form>
 
           </div>
 
-
-          {/* OUTPUT */}
+          {/* RIGHT SIDE OUTPUT */}
 
           <div className="bg-white p-8 rounded-xl shadow">
 
             <h2 className="text-xl font-semibold mb-6">
-              AI Generated Content
+              AI Generated Reel
             </h2>
 
-            {!generated && (
+            {!script && (
               <p className="text-gray-500">
-                Your generated post will appear here.
+                AI generated reel script will appear here.
               </p>
             )}
 
-            {generated && (
+            {script && (
 
               <div className="space-y-6">
 
                 <div>
-                  <h3 className="font-semibold text-[#555879]">Hook</h3>
-                  <p>{generated.hook}</p>
+                  <h3 className="font-semibold text-[#555879]">
+                    Hook
+                  </h3>
+                  <p>{script.hook}</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-[#555879]">Caption</h3>
-                  <p className="whitespace-pre-line">{generated.caption}</p>
+                  <h3 className="font-semibold text-[#555879]">
+                    Reel Script
+                  </h3>
+                  <pre className="whitespace-pre-wrap">
+                    {script.script}
+                  </pre>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-[#555879]">Hashtags</h3>
-                  <p>{generated.hashtags}</p>
+                  <h3 className="font-semibold text-[#555879]">
+                    Caption
+                  </h3>
+                  <p>{script.caption}</p>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-[#555879]">
+                    Hashtags
+                  </h3>
+                  <p>{script.hashtags}</p>
                 </div>
 
               </div>
@@ -195,4 +171,4 @@ function CreatePost() {
   );
 }
 
-export default CreatePost;
+export default CreateReel;
