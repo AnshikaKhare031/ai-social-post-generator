@@ -1,5 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 
 import Landing from "./pages/Landing";
@@ -8,38 +9,39 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreatePost from "./pages/CreatePost";
 import CreateReel from "./pages/CreateReel";
-import History from "./pages/History"; // ✅ NEW
+import History from "./pages/History";
 
-function App() {
+/** Redirects unauthenticated users to /login */
+function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+function AppRoutes() {
   return (
     <div>
-
-      {/* Navbar visible on all pages */}
       <Navbar />
-
-      {/* Routes */}
       <Routes>
-
-        {/* Landing Page */}
+        {/* Public */}
         <Route path="/" element={<Landing />} />
-
-        {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* Creator Studio */}
-        <Route path="/create-post" element={<CreatePost />} />
-        <Route path="/create-reel" element={<CreateReel />} />
-
-        {/* 🔥 NEW HISTORY ROUTE */}
-        <Route path="/history" element={<History />} />
-
+        {/* Protected */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+        <Route path="/create-reel" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       </Routes>
-
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 
